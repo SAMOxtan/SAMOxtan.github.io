@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"samo.fun","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近使用Pyshark(版本为0.4.2.2)的过程中发现有很多的限制，还有一些奇怪的问题　　1、sniff_continuously抛出TSharkCrashException的解决方法　　2、将原始数据内容解析为包（raw-&amp;gt;packet）　　3、InMemCapture()使用only_summaries参数后多次用parse_packet会报错">
+<meta name="keywords" content="Pyshark,Python3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pyshark中使用LiveCapture和InMemCapture杂记">
+<meta property="og:url" content="http://samo.fun/2019/01/11/Pyshark_LiveCapture_InMemCapture_Miscellany/index.html">
+<meta property="og:site_name" content="SAMO">
+<meta property="og:description" content="最近使用Pyshark(版本为0.4.2.2)的过程中发现有很多的限制，还有一些奇怪的问题　　1、sniff_continuously抛出TSharkCrashException的解决方法　　2、将原始数据内容解析为包（raw-&amp;gt;packet）　　3、InMemCapture()使用only_summaries参数后多次用parse_packet会报错">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-02T16:02:43.866Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pyshark中使用LiveCapture和InMemCapture杂记">
+<meta name="twitter:description" content="最近使用Pyshark(版本为0.4.2.2)的过程中发现有很多的限制，还有一些奇怪的问题　　1、sniff_continuously抛出TSharkCrashException的解决方法　　2、将原始数据内容解析为包（raw-&amp;gt;packet）　　3、InMemCapture()使用only_summaries参数后多次用parse_packet会报错">
+
+<link rel="canonical" href="http://samo.fun/2019/01/11/Pyshark_LiveCapture_InMemCapture_Miscellany/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Pyshark中使用LiveCapture和InMemCapture杂记 | SAMO</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SAMO</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://samo.fun/2019/01/11/Pyshark_LiveCapture_InMemCapture_Miscellany/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325201538.jpg">
+      <meta itemprop="name" content="SAMO">
+      <meta itemprop="description" content="Have fun!">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAMO">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Pyshark中使用LiveCapture和InMemCapture杂记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-01-11 17:32:43" itemprop="dateCreated datePublished" datetime="2019-01-11T17:32:43+08:00">2019-01-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-03 00:02:43" itemprop="dateModified" datetime="2019-04-03T00:02:43+08:00">2019-04-03</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>　　最近使用<a href="https://github.com/KimiNewt/pyshark" target="_blank" rel="noopener">Pyshark</a>(版本为0.4.2.2)的过程中发现有很多的限制，还有一些奇怪的问题<br>　　<a href="#1">1、sniff_continuously抛出TSharkCrashException的解决方法</a><br>　　<a href="#2">2、将原始数据内容解析为包（raw-&gt;packet）</a><br>　　<a href="#3">3、InMemCapture()使用only_summaries参数后多次用parse_packet会报错</a></p>
+<a id="more"></a>
+<hr>
+<h2 id="Pyshark使用时参考的文章"><a href="#Pyshark使用时参考的文章" class="headerlink" title="Pyshark使用时参考的文章"></a>Pyshark使用时参考的文章</h2><p><a href="http://zodiacg.net/2016/07/intro2pyshark-ep1/" target="_blank" rel="noopener">PyShark入门(1)：简介</a><br><a href="http://zodiacg.net/2016/07/intro2pyshark-ep2/" target="_blank" rel="noopener">PyShark入门(2)：FileCapture和LiveCapture模块</a><br><a href="http://zodiacg.net/2016/07/intro2pyshark-ep3/" target="_blank" rel="noopener">PyShark入门(3)：capture对象</a><br><a href="https://blog.csdn.net/ace_fei/article/details/51492329" target="_blank" rel="noopener">Pyshark分析pcap文件</a><br><a href="https://www.wireshark.org/docs/wsug_html_chunked/AppToolstshark.html" target="_blank" rel="noopener">D.2. tshark: Terminal-based Wireshark</a></p>
+<hr>
+<h2 id="sniff-continuously抛出TSharkCrashException的解决方法"><a href="#sniff-continuously抛出TSharkCrashException的解决方法" class="headerlink" title="sniff_continuously抛出TSharkCrashException的解决方法"></a><a name="1">sniff_continuously抛出TSharkCrashException的解决方法</a></h2><p>　　此处的使用是在一个继承了QThread的线程类里面</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#self.interface 网卡</span></span><br><span class="line"><span class="comment">#self.number    捕获数量</span></span><br><span class="line">cap = pyshark.LiveCapture(interface = self.interface)</span><br><span class="line"><span class="comment">#逐个获取self.number个包</span></span><br><span class="line"><span class="keyword">for</span> pkt <span class="keyword">in</span> cap.sniff_continuously(packet_count = self.number):</span><br><span class="line">    <span class="comment">#如果stop变为True则线程结束，停止抓包</span></span><br><span class="line">    <span class="keyword">if</span> self.stop:</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        print(pkt)</span><br></pre></td></tr></table></figure>
+<p>　　无论是使用sniff_continuously迭代器抓取完还是break出循环，都会报错，多次报错后会导致程序崩溃<br>　　应该是代码存在bug，issue中有人提了这个问题，后看<a href="https://github.com/KimiNewt/pyshark/blob/6311e3e5598d42220ef02b896375544c1825113b/src/pyshark/capture/live_capture.py#L100" target="_blank" rel="noopener">sniff_continuously代码注释</a>，使用apply_on_packets和回调函数，每抓一个包调用回调函数，可以实现同样的功能，并且可以解决报错和崩溃的问题，还有略微的性能提升</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cap = pyshark.LiveCapture(interface = self.interface)</span><br><span class="line">cap.apply_on_packets(self.packet_captured, packet_count = self.number)</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">packet_captured</span><span class="params">(self, pkt)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> self.stop:</span><br><span class="line">        <span class="comment"># apply_on_packets -&gt; packets_from_tshar -&gt; try..except StopCapture:</span></span><br><span class="line">        <span class="comment">#抛出异常，结束线程，如果调用exit,quit,terminate等方法还是会在循环里</span></span><br><span class="line">        <span class="keyword">raise</span> StopCapture()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        print(pkt)</span><br></pre></td></tr></table></figure>
+<p>　　此处值得注意的是不能通过exit,quit,terminate等方法停止线程，需要使用Pyshark中自定义异常StopCapture()来停止</p>
+<hr>
+<h2 id="将原始数据内容解析为包（raw-gt-packet）"><a href="#将原始数据内容解析为包（raw-gt-packet）" class="headerlink" title="将原始数据内容解析为包（raw-&gt;packet）"></a><a name="2">将原始数据内容解析为包（raw-&gt;packet）</a></h2><p>　　这次的程序也是用pyqt5制作的界面，想要模仿一下Wireshark（Pyshark就是用Python封装了tshark，而tshark又是Wireshark的组件，这么做确实挺奇怪的…）<br>　　Wireshark主界面一共有三个窗口，从上至下依次为，概要信息窗口，详细信息窗口，原始数据窗口，获取概要信息要only_summaries=True，获取原始数据要use_json=True,  include_raw=True<br>　　注：only_summaries 和 use_json、include_raw 不能同时为True，否则会抓不到包<br>　　<br>　　我的目的是同时获取详细信息和原始数据，但是在LiveCapture中只能二者获得其一</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#详细数据内容</span></span><br><span class="line">cap = pyshark.LiveCapture(interface=<span class="string">'WLAN'</span>) </span><br><span class="line">cap.sniff(packet_count=<span class="number">5</span>)</span><br><span class="line">print(cap[<span class="number">0</span>])  </span><br><span class="line">-------------------------------</span><br><span class="line">Layer ETH:</span><br><span class="line">        Destination: <span class="number">88</span>:<span class="number">35</span>:<span class="number">68</span>:<span class="number">24</span>:e4:<span class="number">69</span></span><br><span class="line">        Address: <span class="number">88</span>:<span class="number">35</span>:<span class="number">68</span>:<span class="number">24</span>:e4:<span class="number">69</span></span><br><span class="line">        .... .<span class="number">.0</span>. .... .... .... .... = LG bit: Globally unique address (factory default)</span><br><span class="line">        .... ..<span class="number">.0</span> .... .... .... .... = IG bit: Individual address (unicast)</span><br><span class="line">        Source: <span class="number">94</span>:<span class="number">1</span>d:<span class="number">17</span>:<span class="number">58</span>:<span class="number">4</span>e:a6</span><br><span class="line">        Type: IPv4 (<span class="number">0x0800</span>)</span><br><span class="line">        Address: <span class="number">94</span>:<span class="number">1</span>d:<span class="number">17</span>:<span class="number">58</span>:<span class="number">4</span>e:a6</span><br><span class="line">        .... .<span class="number">.1</span>. .... .... .... .... = LG bit: Locally administered address (this <span class="keyword">is</span> NOT the factory default)</span><br><span class="line">        .... ..<span class="number">.0</span> .... .... .... .... = IG bit: Individual address (unicast)</span><br><span class="line">Layer IP:</span><br><span class="line">        <span class="number">0100</span> .... = Version: <span class="number">4</span></span><br><span class="line">        .... <span class="number">0101</span> = Header Length: <span class="number">20</span> bytes (<span class="number">5</span>)</span><br><span class="line">        Differentiated Services Field: <span class="number">0x00</span> (DSCP: CS0, ECN: Not-ECT)</span><br><span class="line">        <span class="number">0000</span> <span class="number">00.</span>. = Differentiated Services Codepoint: Default (<span class="number">0</span>)</span><br><span class="line">        .... .<span class="number">.00</span> = Explicit Congestion Notification: Not ECN-Capable Transport (<span class="number">0</span>)</span><br><span class="line">        Total Length: <span class="number">48</span></span><br><span class="line">        Identification: <span class="number">0x14e5</span> (<span class="number">5349</span>)</span><br><span class="line">        ...</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>　　在LiveCapture中用use_json=True,  include_raw=True可以包的原始数据内容，但是会丢失tshark解析出来的东西<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#原始数据内容</span></span><br><span class="line">cap = pyshark.LiveCapture(interface=<span class="string">'WLAN'</span>, use_json=<span class="keyword">True</span>, include_raw=<span class="keyword">True</span>) </span><br><span class="line">cap.sniff(packet_count=<span class="number">5</span>)</span><br><span class="line">print(cap[<span class="number">0</span>].frame_raw.value)</span><br><span class="line">-------------------------------</span><br><span class="line"><span class="number">88356824e469941</span>d17584ea6080045000030165340008006569fc0a80066acd91fee29fb01bbe701826c000000007002faf065340000020405b401010402</span><br><span class="line">-------------------------------</span><br><span class="line">print(cap[<span class="number">0</span>])</span><br><span class="line">-------------------------------</span><br><span class="line">Packet (Length: <span class="number">62</span>)</span><br><span class="line">Layer ETH:</span><br><span class="line">        src_raw: <span class="number">941</span>d17584ea6</span><br><span class="line">        src_raw: <span class="number">6</span></span><br><span class="line">        src_raw: <span class="number">6</span></span><br><span class="line">        src_raw: <span class="number">29</span></span><br><span class="line">        type: <span class="number">0x00000800</span></span><br><span class="line">        src:</span><br><span class="line">                addr_resolved: <span class="number">94</span>:<span class="number">1</span>d:<span class="number">17</span>:<span class="number">58</span>:<span class="number">4</span>e:a6</span><br><span class="line">                src_resolved_raw: <span class="number">941</span>d17584ea6</span><br><span class="line">                src_resolved_raw: <span class="number">6</span></span><br><span class="line">                src_resolved_raw: <span class="number">6</span></span><br><span class="line">                src_resolved_raw: <span class="number">26</span></span><br><span class="line">                addr_resolved_raw: <span class="number">941</span>d17584ea6</span><br><span class="line">                addr_resolved_raw: <span class="number">6</span></span><br><span class="line">                addr_resolved_raw: <span class="number">6</span></span><br><span class="line">                addr_resolved_raw: <span class="number">26</span></span><br><span class="line">                ig_raw: <span class="number">0</span></span><br><span class="line">                ig_raw: <span class="number">6</span></span><br><span class="line">                ig_raw: <span class="number">3</span></span><br><span class="line">                ig_raw: <span class="number">65536</span></span><br><span class="line">                ...</span><br><span class="line">                ...</span><br></pre></td></tr></table></figure></p>
+<p>　　看<a href="https://github.com/KimiNewt/pyshark/blob/master/src/pyshark/capture/inmem_capture.py#L85" target="_blank" rel="noopener">源码注释</a>发现InMemCapture可以把bytes解析为包，实现raw-&gt;packet，就是这么做会降低运行效率<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">raw_to_pkt = pyshark.InMemCapture()</span><br><span class="line"><span class="comment"># raw -&gt; bytes</span></span><br><span class="line">frame_raw_value = cap[<span class="number">0</span>].frame_raw.value</span><br><span class="line">bytes_raw = bytes.fromhex(frame_raw_value)</span><br><span class="line"><span class="comment"># bytes -&gt; packet</span></span><br><span class="line"><span class="comment">#parse_packet函数返回是返回一个packet包，这里和后面是为了简化代码，直接使用</span></span><br><span class="line">raw_to_pkt.parse_packet(bytes_raw)</span><br></pre></td></tr></table></figure></p>
+<p>　　注：在Capture的事件循环中是不允许创建或使用其他Capture的，比如<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">raw_to_pkt = pyshark.InMemCapture()</span><br><span class="line">cap = pyshark.LiveCapture(interface = self.interface, use_json=<span class="keyword">True</span>, include_raw=<span class="keyword">True</span>)</span><br><span class="line">cap.apply_on_packets(self.packet_captured, packet_count = self.number)</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">packet_captured</span><span class="params">(self, pkt)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> self.stop:</span><br><span class="line">        <span class="comment"># apply_on_packets -&gt; packets_from_tshar -&gt; try..except StopCapture:</span></span><br><span class="line">        <span class="comment">#抛出异常，结束线程，如果调用exit,quit,terminate等方法还是会在循环里</span></span><br><span class="line">        <span class="keyword">raise</span> StopCapture()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        frame_raw_value = pkt.frame_raw.value</span><br><span class="line">        bytes_raw = bytes.fromhex(frame_raw_value)</span><br><span class="line">        <span class="comment">#这里会抛出RuntimeError: Cannot run the event loop while another loop is running</span></span><br><span class="line">        raw_to_pkt.parse_packet(bytes_raw)</span><br></pre></td></tr></table></figure></p>
+<p>　　但是可以创建一个线程来使用，将16行的代码修改如下（运行效率会进一步降低..）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">t = threading.Thread(target=raw_to_pkt.parse_packet, args=(bytes_raw,))</span><br><span class="line">t.start()</span><br><span class="line">t.join()</span><br></pre></td></tr></table></figure></p>
+<p>　　如果需要获取线程的返回值要再加一个类，参考：<a href="https://www.cnblogs.com/hujq1029/p/7219163.html?utm_source=itdadao&amp;utm_medium=referral" target="_blank" rel="noopener">python获取多线程的返回值</a><br>　　注：InMemCapture生成的包的序号和时间是根据使用InMemCapture时的时间生成的，与传入LiveCapture的包的序号和时间不一样
+　　</p>
+<hr>
+<h2 id="InMemCapture-使用only-summaries参数后多次用parse-packet会报错"><a href="#InMemCapture-使用only-summaries参数后多次用parse-packet会报错" class="headerlink" title="InMemCapture()使用only_summaries参数后多次用parse_packet会报错"></a><a name="3">InMemCapture()使用only_summaries参数后多次用parse_packet会报错</a></h2><p>　　如下情况会报错</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">cap = pyshark.LiveCapture(interface=<span class="string">'WLAN'</span>,use_json=<span class="keyword">True</span>,include_raw=<span class="keyword">True</span>)</span><br><span class="line">imc = pyshark.InMemCapture(only_summaries = <span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">cap.sniff(packet_count=<span class="number">5</span>)</span><br><span class="line"><span class="comment"># raw -&gt; bytes</span></span><br><span class="line">frame_raw_value = cap[<span class="number">0</span>].frame_raw.value</span><br><span class="line">bytes_raw = bytes.fromhex(frame_raw_value)</span><br><span class="line"><span class="comment"># bytes -&gt; packet</span></span><br><span class="line">print(imc.parse_packet(bytes_raw))</span><br><span class="line">-------------------------------</span><br><span class="line"><span class="number">1</span> <span class="number">0.0</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.222</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.233</span> TCP <span class="number">62</span> <span class="number">14124</span> \xe2\x86\x92 <span class="number">443</span> [SYN] Seq=<span class="number">0</span> Win=<span class="number">64240</span> Len=<span class="number">0</span> MSS=<span class="number">1460</span> SACK_PERM=<span class="number">1</span></span><br><span class="line">-------------------------------</span><br><span class="line"><span class="comment">#再次使用会报错，tshark进程会奔溃</span></span><br><span class="line">print(imc.parse_packet(bytes_raw))</span><br><span class="line">-------------------------------</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"E:\Python3.6.1\lib\site-packages\pyshark\capture\inmem_capture.py"</span>, line <span class="number">123</span>, <span class="keyword">in</span> _get_parsed_packet_from_tshark</span><br><span class="line">    DEFAULT_TIMEOUT)</span><br><span class="line">  File <span class="string">"E:\Python3.6.1\lib\asyncio\tasks.py"</span>, line <span class="number">356</span>, <span class="keyword">in</span> wait_for</span><br><span class="line">    <span class="keyword">raise</span> futures.TimeoutError()</span><br><span class="line">concurrent.futures._base.TimeoutError</span><br><span class="line"></span><br><span class="line">During handling of the above exception, another exception occurred:</span><br><span class="line"></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;stdin&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">  File <span class="string">"E:\Python3.6.1\lib\site-packages\pyshark\capture\inmem_capture.py"</span>, line <span class="number">93</span>, <span class="keyword">in</span> parse_packet</span><br><span class="line">    <span class="keyword">return</span> self.parse_packets([binary_packet])[<span class="number">0</span>]</span><br><span class="line">  File <span class="string">"E:\Python3.6.1\lib\site-packages\pyshark\capture\inmem_capture.py"</span>, line <span class="number">116</span>, <span class="keyword">in</span> parse_packets</span><br><span class="line">    self.eventloop.run_until_complete(self._get_parsed_packet_from_tshark(callback))</span><br><span class="line">  File <span class="string">"E:\Python3.6.1\lib\asyncio\base_events.py"</span>, line <span class="number">466</span>, <span class="keyword">in</span> run_until_complete</span><br><span class="line">    <span class="keyword">return</span> future.result()</span><br><span class="line">  File <span class="string">"E:\Python3.6.1\lib\site-packages\pyshark\capture\inmem_capture.py"</span>, line <span class="number">126</span>, <span class="keyword">in</span> _get_parsed_packet_from_tshark</span><br><span class="line">    <span class="keyword">raise</span> asyncio.TimeoutError(<span class="string">"Timed out while waiting for tshark to parse packet. "</span></span><br><span class="line">concurrent.futures._base.TimeoutError: Timed out <span class="keyword">while</span> waiting <span class="keyword">for</span> tshark to parse packet. Try rerunning <span class="keyword">with</span> cap.set_debug() to see tshark errors. Closing tshark..</span><br></pre></td></tr></table></figure>
+<p>　　这应该是bug，提了个<a href="https://github.com/KimiNewt/pyshark/issues/316" target="_blank" rel="noopener">issue</a>，如果一定要使用的话必须每次使用parse_packet前重新创建InMemCapture对象，如下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>):</span><br><span class="line">    imc = pyshark.InMemCapture(only_summaries = <span class="keyword">True</span>)</span><br><span class="line">    print(imc.parse_packet(bytes_raw))</span><br><span class="line">-------------------------------</span><br><span class="line"><span class="number">1</span> <span class="number">0.0</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.222</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.233</span> TCP <span class="number">62</span> <span class="number">14124</span> \xe2\x86\x92 <span class="number">443</span> [SYN] Seq=<span class="number">0</span> Win=<span class="number">64240</span> Len=<span class="number">0</span> MSS=<span class="number">1460</span> SACK_PERM=<span class="number">1</span></span><br><span class="line"><span class="number">1</span> <span class="number">0.0</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.222</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.233</span> TCP <span class="number">62</span> <span class="number">14124</span> \xe2\x86\x92 <span class="number">443</span> [SYN] Seq=<span class="number">0</span> Win=<span class="number">64240</span> Len=<span class="number">0</span> MSS=<span class="number">1460</span> SACK_PERM=<span class="number">1</span></span><br><span class="line"><span class="number">1</span> <span class="number">0.0</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.222</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.233</span> TCP <span class="number">62</span> <span class="number">14124</span> \xe2\x86\x92 <span class="number">443</span> [SYN] Seq=<span class="number">0</span> Win=<span class="number">64240</span> Len=<span class="number">0</span> MSS=<span class="number">1460</span> SACK_PERM=<span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>SAMO
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://samo.fun/2019/01/11/Pyshark_LiveCapture_InMemCapture_Miscellany/" title="Pyshark中使用LiveCapture和InMemCapture杂记">http://samo.fun/2019/01/11/Pyshark_LiveCapture_InMemCapture_Miscellany/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/pyshark/" rel="tag"># Pyshark</a>
+              <a href="/tags/python3/" rel="tag"># Python3</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/02/25/pyqt5-tablewidget-checkboxcombobox/" rel="prev" title="pyqt5中的tableWidget添加checkBox、comboBox">
+      <i class="fa fa-chevron-left"></i> pyqt5中的tableWidget添加checkBox、comboBox
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/03/17/typora-xss-to-rce/" rel="next" title="Typora(v0.9.67) XSS to RCE">
+      Typora(v0.9.67) XSS to RCE <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="space"></div>
+    <div class="sidebar-inner">
+
+
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <a href="/">
+    <img class="site-author-image" itemprop="image" alt="SAMO"
+      src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325201538.jpg">
+  <p class="site-author-name" itemprop="name">SAMO</p>
+  </a>
+  <div class="site-description" itemprop="description">Have fun!</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-root">
+        <a href="/">
+        <span class="site-state-item-count">
+          <i class="fa fa-fw fa-home"></i>
+        </span>
+        <span class="site-state-item-name">首页</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SAMOxtan" title="GitHub → https://github.com/SAMOxtan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:samoxtan@gmail.com" title="E-Mail → mailto:samoxtan@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pyshark使用时参考的文章"><span class="nav-number">1.</span> <span class="nav-text">Pyshark使用时参考的文章</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sniff-continuously抛出TSharkCrashException的解决方法"><span class="nav-number">2.</span> <span class="nav-text">sniff_continuously抛出TSharkCrashException的解决方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将原始数据内容解析为包（raw-gt-packet）"><span class="nav-number">3.</span> <span class="nav-text">将原始数据内容解析为包（raw-&gt;packet）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#InMemCapture-使用only-summaries参数后多次用parse-packet会报错"><span class="nav-number">4.</span> <span class="nav-text">InMemCapture()使用only_summaries参数后多次用parse_packet会报错</span></a></li></ol></div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SAMO</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

