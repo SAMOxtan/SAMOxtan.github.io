@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"samo.fun","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="0x00好久没做题了，IDA都还是6.8的版本，重装了Python环境连IDA Python都没有。协会也有自己的CTF比赛了，RE题目整体都比较简单，是面向萌新的，我做题过程基本上都很偷懒，很多都是调试的时候硬扒下来的">
+<meta name="keywords" content="CTF,RE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WUSTCTF2020 RE Writeup">
+<meta property="og:url" content="http://samo.fun/2020/03/29/WUSTCTF2020-RE-Writeup/index.html">
+<meta property="og:site_name" content="SAMO">
+<meta property="og:description" content="0x00好久没做题了，IDA都还是6.8的版本，重装了Python环境连IDA Python都没有。协会也有自己的CTF比赛了，RE题目整体都比较简单，是面向萌新的，我做题过程基本上都很偷懒，很多都是调试的时候硬扒下来的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223833.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223921.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223935.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223940.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223946.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224002.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224007.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224013.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224542.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329140119.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224027.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224034.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329141328.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224040.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224045.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224050.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224055.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224104.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224110.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329143605.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224117.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224123.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329141439.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224132.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224157.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224209.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329162101.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224412.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224311.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224455.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224502.png">
+<meta property="og:updated_time" content="2020-03-29T15:47:24.760Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WUSTCTF2020 RE Writeup">
+<meta name="twitter:description" content="0x00好久没做题了，IDA都还是6.8的版本，重装了Python环境连IDA Python都没有。协会也有自己的CTF比赛了，RE题目整体都比较简单，是面向萌新的，我做题过程基本上都很偷懒，很多都是调试的时候硬扒下来的">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223833.png">
+
+<link rel="canonical" href="http://samo.fun/2020/03/29/WUSTCTF2020-RE-Writeup/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WUSTCTF2020 RE Writeup | SAMO</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SAMO</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://samo.fun/2020/03/29/WUSTCTF2020-RE-Writeup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325201538.jpg">
+      <meta itemprop="name" content="SAMO">
+      <meta itemprop="description" content="Have fun!">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAMO">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WUSTCTF2020 RE Writeup
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-29 18:50:33 / 修改时间：23:47:24" itemprop="dateCreated datePublished" datetime="2020-03-29T18:50:33+08:00">2020-03-29</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h2><p>好久没做题了，IDA都还是6.8的版本，重装了Python环境连IDA Python都没有。<a href="https://ctfgame.w-ais.cn/" target="_blank" rel="noopener">协会</a>也有自己的CTF比赛了，RE题目整体都比较简单，是面向萌新的，我做题过程基本上都很偷懒，很多都是调试的时候硬扒下来的</p>
+<a id="more"></a>
+<h2 id="0x01-Cr0ssFun"><a href="#0x01-Cr0ssFun" class="headerlink" title="0x01 Cr0ssFun"></a>0x01 Cr0ssFun</h2><p>拖进IDA，F5看反汇编，逻辑很简单，输入字符串，然后check函数判断</p>
+<p>看check函数，发现直接return iven_is_handsome()</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223833.png" alt="image-20200329170320204"></p>
+<p>后面都是一层一层的套娃，把这些提取出来放到文本，正则替换一下，放入Python运行即可，如果套娃层数多的话可以写IDA Python提取</p>
+<blockquote>
+<p>wctf2020{cpp_@nd<em>r3verse</em>@re_fun}</p>
+</blockquote>
+<h2 id="0x02-level1"><a href="#0x02-level1" class="headerlink" title="0x02 level1"></a>0x02 level1</h2><p>output.txt里面有一些数字，程序逻辑很简单，逆过来就好了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223921.png" alt="image-20200329184330101"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a=[<span class="number">0</span>,<span class="number">198</span>,<span class="number">232</span>,<span class="number">816</span>,<span class="number">200</span>,<span class="number">1536</span>,<span class="number">300</span>,<span class="number">6144</span>,<span class="number">984</span>,<span class="number">51200</span>,<span class="number">570</span>,<span class="number">92160</span>,<span class="number">1200</span>,<span class="number">565248</span>,<span class="number">756</span>,<span class="number">1474560</span>,<span class="number">800</span>,<span class="number">6291456</span>,<span class="number">1782</span>,<span class="number">65536000</span>]</span><br><span class="line">flag=<span class="string">'w'</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,len(a)):</span><br><span class="line">    <span class="keyword">if</span> i&amp;<span class="number">1</span>:</span><br><span class="line">        flag += chr(a[i]&gt;&gt;i)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        flag += chr(a[i]//i)</span><br><span class="line"></span><br><span class="line">print(flag)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>wctf2020{d9-dE6-20c}</p>
+</blockquote>
+<h2 id="0x03-level2"><a href="#0x03-level2" class="headerlink" title="0x03 level2"></a>0x03 level2</h2><p>用upx加壳了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223935.png" alt="image-20200329184535523"></p>
+<p>直接用upx shell脱壳</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223940.png" alt="image-20200329184644549"></p>
+<blockquote>
+<p>wctf2020{Just<em>upx</em>-d}</p>
+</blockquote>
+<h2 id="0x04-level3"><a href="#0x04-level3" class="headerlink" title="0x04 level3"></a>0x04 level3</h2><p>这题是修改了base64编码表</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329223946.png" alt="image-20200329184905028"></p>
+<p>进行修改的函数</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224002.png" alt="image-20200329184846351"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line">a = list(<span class="string">'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    tmp = a[i]</span><br><span class="line">    a[i] = a[<span class="number">19</span> - i]</span><br><span class="line">    a[<span class="number">19</span> - i] = tmp</span><br><span class="line">a = <span class="string">''</span>.join(a)</span><br><span class="line"><span class="comment">#print(a)</span></span><br><span class="line"></span><br><span class="line">b = <span class="string">'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'</span></span><br><span class="line"></span><br><span class="line">base_fix = <span class="string">'d2G0ZjLwHjS7DmOzZAY0X2lzX3CoZV9zdNOydO9vZl9yZXZlcnGlfD=='</span></span><br><span class="line">table = <span class="string">''</span>.maketrans(a, b)</span><br><span class="line">print(base64.b64decode(base_fix.translate(table)))</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>wctf2020{Base64_is_the_start_of_reverse}</p>
+</blockquote>
+<h2 id="0x05-level4"><a href="#0x05-level4" class="headerlink" title="0x05 level4"></a>0x05 level4</h2><p>提示有个二叉树的数据结构</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224007.png" alt="image-20200329213240725"></p>
+<p>type1是后序遍历</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224013.png" alt="image-20200329213317181"></p>
+<p>type2是中序遍历</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224542.png" alt="image-20200329213328205"></p>
+<p>显然flag就是求先序遍历了，直接用网上的代码</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">    输入树的后序序列和中序序列输出前序数列</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">string</span> a = <span class="string">"20f0Th&#123;2tsIS_icArE&#125;e7__w"</span>;  <span class="comment">//中序</span></span><br><span class="line"><span class="built_in">string</span> b = <span class="string">"2f0t02T&#123;hcsiI_SwA__r7Ee&#125;"</span>;  <span class="comment">//后序</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(<span class="keyword">int</span> ab, <span class="keyword">int</span> ae, <span class="keyword">int</span> bb, <span class="keyword">int</span> be)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(ab &gt; ae)<span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">char</span> root = a[ae];</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; root;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">for</span>(i=bb; b[i]!=root; i++);</span><br><span class="line">    f(ab, ab+i-bb<span class="number">-1</span>, bb, i<span class="number">-1</span>);</span><br><span class="line">    f(ab+i-bb, ae<span class="number">-1</span>, i+<span class="number">1</span>, be);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> l = a.length();</span><br><span class="line">    f(<span class="number">0</span>,l<span class="number">-1</span>,<span class="number">0</span>,l<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>wctf2020{This_IS_A_7reE}</p>
+</blockquote>
+<h2 id="0x06-funnyre"><a href="#0x06-funnyre" class="headerlink" title="0x06 funnyre"></a>0x06 funnyre</h2><p>先运行一下，发现啥都没提示就结束了，先看下start函数，传了init和main的地址</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329140119.png" alt="image-20200329140109009"></p>
+<p>先看init，F5一下，</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224027.png" alt="image-20200329144713196"></p>
+<p>可以看到里面有个do while循环，看下off_602E08</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224034.png" alt="image-20200329144919439"></p>
+<p>可以知道当v5为0时调用sub_401E90，V5为1时调用sub_4004C0，这里盲猜v4 = 2，动态调试一下，先在init开头下断点</p>
+<p>把要调试的main放入linux下，linux_serverx64也放进去，先用chmod 766 给两个赋予权限，运行linux_serverx64</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329141328.png" alt="image-20200329141327051"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224040.png" alt="image-20200329150234959"></p>
+<p>选择Remote Linux debugger，填上被调试文件的路径和目录，还有Linux的ip地址，参数暂时不填</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224045.png" alt="image-20200329150300083"></p>
+<p>一路f8到调用函数的地方，可以看到v4确实为2</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224050.png" alt="image-20200329150817741"></p>
+<p>在call的地方f7进去，在sub_401E90逛了一圈，发现它对put函数的地址操作了一番，好像没找到有用的地方。出来sub_401E90后第二次f7进去就是进sub_4004C0，里面有很多对byte的异或操作</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224055.png" alt="image-20200329151431453"></p>
+<p>通过动调看下byte异或后变成了啥。在retn的地方下个断点，按f9到这个地方</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224104.png" alt="image-20200329151554704"></p>
+<p>再去看下byte_603048，按R键把hex转成char，可以看到 <strong>you get flag!</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224110.png" alt="image-20200329145935032"></p>
+<p>init对成功后提示的字符串进行了初始化，继续看main函数，有很多个比较，R转换后发现是flag{}，‘}’在第37位，所以flag长度为37，中间的部分长度为32</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329143605.png" alt="image-20200329143602566"></p>
+<p>后面是对中间32位每一位都进行xor或者add的操作，中间穿插着花指令，没办法反编译，但是其余正常的指令比较简单，影响不大</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224117.png" alt="image-20200329155328775"></p>
+<p>搜一下byte prt [rdx + rax +5]，有特别多的结果</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224123.png" alt="image-20200329155858609"></p>
+<p>继续动调，修改下调试参数，填flag{1*32}试下</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329141439.png" alt="image-20200329141438833"></p>
+<p>在最后一个操作结束后下个断点，把其他断点先删除</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224132.png" alt="image-20200329160307204"></p>
+<p>在断点处停下在寄存器RDX处右键，跳转过去看下heap</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224157.png" alt="image-20200329161006668"></p>
+<p>可以看到原本的 ‘1’ 经过一系列操作变成了0xd9，其实就是 ‘1’ -&gt; 0xd9 的映射</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224209.png" alt="image-20200329161233347"></p>
+<p>同时在停下来的地方，可以看到有一个_memcmp，比较中间32位，将unk_4025c0里面这段提取出来</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329162101.png" alt="image-20200329161704061"></p>
+<p>现在的思路就比较清晰了，获取字符[a-zA-Z0-9]映射，然后把unk_4025c0逆映射回来，这里为了偷懒，直接用动调获取</p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224412.png" alt="image-20200329163529158"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224311.png" alt="image-20200329224311"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224455.png" alt="image-20200329163900999"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224502.png" alt="image-20200329163946289"></p>
+<p>把变化后的字节提取出来</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">unk_4025c0=[<span class="number">0xD9</span>,<span class="number">0x2C</span>,<span class="number">0x27</span>,<span class="number">0x0D6</span>,<span class="number">0x0D8</span>,<span class="number">0x2A</span>,<span class="number">0x0DA</span>,<span class="number">0x2D</span>,<span class="number">0x0D7</span>,<span class="number">0x2C</span>,<span class="number">0x0DC</span>,<span class="number">0x0E1</span>,<span class="number">0x0DB</span>,<span class="number">0x2C</span>,<span class="number">0x0D9</span>,<span class="number">0x0DD</span>,<span class="number">0x27</span>,<span class="number">0x2D</span>,<span class="number">0x2A</span>,<span class="number">0x0DC</span>,<span class="number">0x0DB</span>,<span class="number">0x2C</span>,<span class="number">0x0E1</span>,<span class="number">0x29</span>,<span class="number">0x0DA</span>,<span class="number">0x0DA</span>,<span class="number">0x2C</span>,<span class="number">0x0DA</span>,<span class="number">0x2A</span>,<span class="number">0x0D9</span>,<span class="number">0x29</span>,<span class="number">0x2A</span>]</span><br><span class="line"></span><br><span class="line">before = list(<span class="string">'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!_'</span>) <span class="comment">#补全64个</span></span><br><span class="line">after = [<span class="number">0x29</span>,<span class="number">0x26</span>,<span class="number">0x27</span>,<span class="number">0x2C</span>,<span class="number">0x2D</span>,<span class="number">0x2A</span>,<span class="number">0x2B</span>,<span class="number">0x30</span>,<span class="number">0x31</span>,<span class="number">0x2E</span>,<span class="number">0x2F</span>,<span class="number">0x34</span>,<span class="number">0x35</span>,<span class="number">0x32</span>,<span class="number">0x33</span>,<span class="number">0x18</span>,<span class="number">0x19</span>,<span class="number">0x16</span>,<span class="number">0x17</span>,<span class="number">0x1C</span>,<span class="number">0x1D</span>,<span class="number">0x1A</span>,<span class="number">0x1B</span>,<span class="number">0x20</span>,<span class="number">0x21</span>,<span class="number">0x1E</span>,<span class="number">0x49</span>,<span class="number">0x46</span>,<span class="number">0x47</span>,<span class="number">0x4C</span>,<span class="number">0x4D</span>,<span class="number">0x4A</span>,<span class="number">0x4B</span>,<span class="number">0x50</span>,<span class="number">0x51</span>,<span class="number">0x4E</span>,<span class="number">0x4F</span>,<span class="number">0x54</span>,<span class="number">0x55</span>,<span class="number">0x52</span>,<span class="number">0x53</span>,<span class="number">0x38</span>,<span class="number">0x39</span>,<span class="number">0x36</span>,<span class="number">0x37</span>,<span class="number">0x3C</span>,<span class="number">0x3D</span>,<span class="number">0x3A</span>,<span class="number">0x3B</span>,<span class="number">0x40</span>,<span class="number">0x41</span>,<span class="number">0x3E</span>,<span class="number">0x0D8</span>,<span class="number">0x0D9</span>,<span class="number">0x0D6</span>,<span class="number">0x0D7</span>,<span class="number">0x0DC</span>,<span class="number">0x0DD</span>,<span class="number">0x0DA</span>,<span class="number">0x0DB</span>,<span class="number">0x0E0</span>,<span class="number">0x0E1</span>,<span class="number">0x0E9</span>,<span class="number">0x43</span>]</span><br><span class="line"></span><br><span class="line">Map = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(after)):</span><br><span class="line">    Map[after[i]] = before[i]</span><br><span class="line"></span><br><span class="line">print(Map)</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">#判断unk_4025c0内的hex是否全在字典内</span></span><br><span class="line"><span class="string">for i in unk_4025c0:</span></span><br><span class="line"><span class="string">    if i not in Map:</span></span><br><span class="line"><span class="string">        print(i, 'not in Map')</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">flag = <span class="string">''</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> unk_4025c0:</span><br><span class="line">    flag += Map[i]</span><br><span class="line"></span><br><span class="line">print(<span class="string">'flag&#123;'</span> + flag + <span class="string">'&#125;'</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>flag{1dc20f6e3d497d15cef47d9a66d6f1af}</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>SAMO
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://samo.fun/2020/03/29/WUSTCTF2020-RE-Writeup/" title="WUSTCTF2020 RE Writeup">http://samo.fun/2020/03/29/WUSTCTF2020-RE-Writeup/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ctf/" rel="tag"># CTF</a>
+              <a href="/tags/re/" rel="tag"># RE</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/26/WMI_Fileless_Backdoor/" rel="prev" title="WMI无文件后门">
+      <i class="fa fa-chevron-left"></i> WMI无文件后门
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="space"></div>
+    <div class="sidebar-inner">
+
+
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <a href="/">
+    <img class="site-author-image" itemprop="image" alt="SAMO"
+      src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200325201538.jpg">
+  <p class="site-author-name" itemprop="name">SAMO</p>
+  </a>
+  <div class="site-description" itemprop="description">Have fun!</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-root">
+        <a href="/">
+        <span class="site-state-item-count">
+          <i class="fa fa-fw fa-home"></i>
+        </span>
+        <span class="site-state-item-name">首页</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SAMOxtan" title="GitHub → https://github.com/SAMOxtan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:samoxtan@gmail.com" title="E-Mail → mailto:samoxtan@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00"><span class="nav-number">1.</span> <span class="nav-text">0x00</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-Cr0ssFun"><span class="nav-number">2.</span> <span class="nav-text">0x01 Cr0ssFun</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-level1"><span class="nav-number">3.</span> <span class="nav-text">0x02 level1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-level2"><span class="nav-number">4.</span> <span class="nav-text">0x03 level2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-level3"><span class="nav-number">5.</span> <span class="nav-text">0x04 level3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x05-level4"><span class="nav-number">6.</span> <span class="nav-text">0x05 level4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x06-funnyre"><span class="nav-number">7.</span> <span class="nav-text">0x06 funnyre</span></a></li></ol></div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SAMO</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
