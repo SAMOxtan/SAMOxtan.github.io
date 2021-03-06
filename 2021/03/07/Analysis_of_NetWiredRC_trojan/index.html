@@ -21,13 +21,13 @@
     var CONFIG = {"hostname":"samo.fun","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="&amp;emsp;&amp;emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功能。">
+  <meta name="description" content="本文翻译至Analysis of NetWiredRC trojan  &amp;emsp;&amp;emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功">
 <meta name="keywords" content="MALWARE ANALYSIS">
 <meta property="og:type" content="article">
 <meta property="og:title" content="NetWiredRC木马分析">
 <meta property="og:url" content="http://samo.fun/2021/03/07/Analysis_of_NetWiredRC_trojan/index.html">
 <meta property="og:site_name" content="SAMO">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功能。">
+<meta property="og:description" content="本文翻译至Analysis of NetWiredRC trojan  &amp;emsp;&amp;emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306231708.jpeg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306231937.png">
@@ -45,10 +45,10 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233237.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233242.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233247.png">
-<meta property="og:updated_time" content="2021-03-06T16:22:09.671Z">
+<meta property="og:updated_time" content="2021-03-06T16:45:49.410Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NetWiredRC木马分析">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功能。">
+<meta name="twitter:description" content="本文翻译至Analysis of NetWiredRC trojan  &amp;emsp;&amp;emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功">
 <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306231708.jpeg">
 
 <link rel="canonical" href="http://samo.fun/2021/03/07/Analysis_of_NetWiredRC_trojan/">
@@ -203,7 +203,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-07 00:06:32 / 修改时间：00:22:09" itemprop="dateCreated datePublished" datetime="2021-03-07T00:06:32+08:00">2021-03-07</time>
+              <time title="创建时间：2021-03-07 00:06:32 / 修改时间：00:45:49" itemprop="dateCreated datePublished" datetime="2021-03-07T00:06:32+08:00">2021-03-07</time>
             </span>
 
           
@@ -224,7 +224,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>&emsp;&emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功能。<br><a id="more"></a><br>可执行样本可以在<a href="app.any.run">app.any.run</a>找到。</p>
+        <blockquote>
+<p>本文翻译至<a href="https://maskop9.tech/index.php/2019/01/30/analysis-of-netwiredrc-trojan/" target="_blank" rel="noopener">Analysis of NetWiredRC trojan</a></p>
+</blockquote>
+<p>&emsp;&emsp;NetWiredRC是APT33组织使用的一种木马，它可以实现远程未经授权的访问和控制受影响的计算机。攻击者可以使用此远程访问工具在受感染的计算机上执行100多种不同的操作。本文包含对NetWiredRC中命令和控制结构的分析。文中所分析的该版本的NetWiredRC样本比其之前已知的版本实现了更多功能。<br><a id="more"></a><br>可执行样本可以在<a href="app.any.run">app.any.run</a>找到。</p>
 <p>可执行样本的哈希：</p>
 <blockquote>
 <p>41b22d484200b434a02c3b3a18ecb9defbc4582d864491d204f02ad25a46340e</p>
@@ -256,9 +259,6 @@
 <p>它还能够查询、创建、更新数据库表，样本中包含了一些可能使用的sql字符串。<br><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233230.png" alt="tableaccess"></p>
 <p>样本使用switch语句来解析从C&amp;C服务器收到的命令，这些命令有100多个<br><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233237.png" alt="command_switch"></p>
 <p>下表显示了与NetWiredRC相关的一些命令的功能。攻击者可以使用C&amp;C服务器在受感染的计算机上运行相应的命令，并且该样本将结果返回给C&amp;C服务器<br><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233242.png" alt="screenshot-from-2019-01-30-13-46-23"><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/Analysis-of-NetWiredRC-trojan/20210306233247.png" alt="screenshot-from-2019-01-30-13-47-13"></p>
-<blockquote>
-<p>本文翻译至<a href="https://maskop9.tech/index.php/2019/01/30/analysis-of-netwiredrc-trojan/" target="_blank" rel="noopener">Analysis of NetWiredRC trojan</a></p>
-</blockquote>
 
     </div>
 
