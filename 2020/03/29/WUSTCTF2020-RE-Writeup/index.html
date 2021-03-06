@@ -319,7 +319,7 @@
 <p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224132.png" alt="image-20200329160307204"></p>
 <p>在断点处停下在寄存器RDX处右键，跳转过去看下heap</p>
 <p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224157.png" alt="image-20200329161006668"></p>
-<p>可以看到原本的 ‘1’ 经过一系列操作变成了0xd9，其实就是 ‘1’ -&gt; 0xd9 的映射</p>
+<p>可以看到原本的 &#39;1&#39; 经过一系列操作变成了0xd9，其实就是 &#39;1&#39; -&gt; 0xd9 的映射</p>
 <p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329224209.png" alt="image-20200329161233347"></p>
 <p>同时在停下来的地方，可以看到有一个_memcmp，比较中间32位，将unk_4025c0里面这段提取出来</p>
 <p><img src="https://cdn.jsdelivr.net/gh/SAMOxtan/blog_images/20200329162101.png" alt="image-20200329161704061"></p>
