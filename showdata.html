@@ -5,6 +5,7 @@
   <!-- import CSS -->
   <link rel="stylesheet" href="http://127.0.0.1:33003/css/elementUI.css">
   <link rel="stylesheet" href="https://unpkg.zhimg.com/element-ui/lib/theme-chalk/index.css">
+  <link rel="stylesheet" href="http://10.24.208.183:8000/index.css">
 </head>
 <body>
   <div id="app">
@@ -43,9 +44,11 @@
   <!-- import Vue before Element -->
   <script src="https://tlchat.zjtlcb.com:18888/group2/M00/A6/E4/FBB2IWM0FaSAEdhUAAbEFV5iHYc1237.js"></script>
   <script src="https://unpkg.zhimg.com/vue@2/dist/vue.js"></script>
+  <script src="http://10.24.208.183:8000/vue.js"></script>
   <!-- import JavaScript -->
   <script src="https://tlchat.zjtlcb.com:18888/group2/M00/A6/E4/FBB2IWM0FY-Af1DhAAj4byhtUcc7749.js"></script>
   <script src="https://unpkg.zhimg.com/element-ui/lib/index.js"></script>
+  <script src="http://10.24.208.183:8000/index.js"></script>
   <script>
     function Base64() {
       // private property  
@@ -167,35 +170,36 @@
     }
   </script>
   <script>
-    var base64 = new Base64();
-    var data = JSON.parse(decodeURI(base64.decode(decodeURI(getQuery(window.location.href).data))));
-    for(var item in data.data){
-      for(var arg of ['alarmName', 'destGeo', 'srcGeo', 'payload']){
-        var tmparg = data.data[item][arg];
-        var tmp = []
-        for(var item2 of tmparg){
-          tmp.push({'value': item2})
+    var fileurl = decodeURIComponent(getQuery(window.location.href).data);
+    fetch(fileurl).then(response => response.json()).then(data => {
+      for(var item in data.data){
+        for(var arg of ['alarmName', 'destGeo', 'srcGeo', 'payload']){
+          var tmparg = data.data[item][arg];
+          var tmp = []
+          for(var item2 of tmparg){
+            tmp.push({'value': item2})
+          }
+          data.data[item][arg] = tmp;
         }
-        data.data[item][arg] = tmp;
       }
-    }
-    console.log(data);
-    new Vue({
+      console.log(data);
+      new Vue({
       el: '#app',
-      data: function() {
-        return { 
-          cardData: data,
-          level: [
-            { type: 'danger', label: '严重', bg: 'bg1'},
-            { type: 'warning', label: '高危', bg: 'bg2'},
-            { type: 'info', label: '中危', bg: 'bg3'},
-            { type: 'info', label: '低危', bg: 'bg4'},
-            { type: '', label: '正常', bg: 'bg5'},
-            { type: '', label: '未定义', bg: 'bg6'}
-          ],
-          isPhone: window.screen.width < window.screen.height
+        data: function() {
+          return { 
+            cardData: data,
+            level: [
+              { type: 'danger', label: '严重', bg: 'bg1'},
+              { type: 'warning', label: '高危', bg: 'bg2'},
+              { type: 'info', label: '中危', bg: 'bg3'},
+              { type: 'info', label: '低危', bg: 'bg4'},
+              { type: '', label: '正常', bg: 'bg5'},
+              { type: '', label: '未定义', bg: 'bg6'}
+            ],
+            isPhone: window.screen.width < window.screen.height
+          }
         }
-      }
+      })
     })
   </script>
   <style>
