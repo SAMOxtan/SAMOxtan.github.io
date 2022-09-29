@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="http://127.0.0.1:33003/css/elementUI.css">
+  <link rel="stylesheet" href="https://unpkg.zhimg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+  <div id="app">
+    <el-row>
+      <!-- v-for循环显示出多个卡片，v-if根据数据类型判断是数据卡片还是开关拉片 -->
+     <el-col :span="isPhone?24:12" v-for="(item) in cardData.data" :key="item.attacker">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span class="card-title">{{item.attacker}}</span>
+            <el-tag effect="dark" :class="level[item.color].bg">{{level[item.color].label}}</el-tag>
+            <div style="float: right">攻击频次: {{item.numAttack}}</div>
+          </div>
+            
+          <el-table :data="item.alarmName" stripe style="width: 100%" :header-cell-style="{background:'#c6d2ff',color:'#2c2c2c', 'text-align': 'center'}">
+            <el-table-column prop="value" label="触发告警"></el-table-column>
+          </el-table>
+          
+          <el-table :data="item.srcGeo" stripe style="width: 100%" :header-cell-style="{background:'#c6d2ff',color:'#2c2c2c', 'text-align': 'center'}">
+            <el-table-column prop="value" label="来源地区"></el-table-column>
+          </el-table>
+
+          <el-table :data="item.destGeo" stripe style="width: 100%" :header-cell-style="{background:'#c6d2ff',color:'#2c2c2c', 'text-align': 'center'}">
+            <el-table-column prop="value" label="目标区域"></el-table-column>
+          </el-table>
+          
+          <el-table :data="item.payload" stripe style="width: 100%" :header-cell-style="{background:'#c6d2ff',color:'#2c2c2c', 'text-align': 'center'}">
+            <el-table-column prop="value" label="攻击载荷"></el-table-column>
+          </el-table>
+        </el-card>
+
+      </el-col>
+    </el-row>
+  </div>
+</body>
+  <!-- import Vue before Element -->
+  <script src="https://tlchat.zjtlcb.com:18888/group2/M00/A6/E4/FBB2IWM0FaSAEdhUAAbEFV5iHYc1237.js"></script>
+  <script src="https://unpkg.zhimg.com/vue@2/dist/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="https://tlchat.zjtlcb.com:18888/group2/M00/A6/E4/FBB2IWM0FY-Af1DhAAj4byhtUcc7749.js"></script>
+  <script src="https://unpkg.zhimg.com/element-ui/lib/index.js"></script>
+  <script>
+    function Base64() {
+      // private property  
+      _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+      // public method for encoding  
+      this.encode = function(input) {
+          var output = "";
+          var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+          var i = 0;
+          input = _utf8_encode(input);
+          while (i < input.length) {
+              chr1 = input.charCodeAt(i++);
+              chr2 = input.charCodeAt(i++);
+              chr3 = input.charCodeAt(i++);
+              enc1 = chr1 >> 2;
+              enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+              enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+              enc4 = chr3 & 63;
+              if (isNaN(chr2)) {
+                  enc3 = enc4 = 64;
+              } else if (isNaN(chr3)) {
+                  enc4 = 64;
+              }
+              output = output +
+                  _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+                  _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+          }
+          return output;
+      }
+
+      // public method for decoding  
+      this.decode = function(input) {
+          var output = "";
+          var chr1, chr2, chr3;
+          var enc1, enc2, enc3, enc4;
+          var i = 0;
+          input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+          while (i < input.length) {
+              enc1 = _keyStr.indexOf(input.charAt(i++));
+              enc2 = _keyStr.indexOf(input.charAt(i++));
+              enc3 = _keyStr.indexOf(input.charAt(i++));
+              enc4 = _keyStr.indexOf(input.charAt(i++));
+              chr1 = (enc1 << 2) | (enc2 >> 4);
+              chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+              chr3 = ((enc3 & 3) << 6) | enc4;
+              output = output + String.fromCharCode(chr1);
+              if (enc3 != 64) {
+                  output = output + String.fromCharCode(chr2);
+              }
+              if (enc4 != 64) {
+                  output = output + String.fromCharCode(chr3);
+              }
+          }
+          output = _utf8_decode(output);
+          return output;
+      }
+
+      // private method for UTF-8 encoding  
+      _utf8_encode = function(string) {
+          string = string.replace(/\r\n/g, "\n");
+          var utftext = "";
+          for (var n = 0; n < string.length; n++) {
+              var c = string.charCodeAt(n);
+              if (c < 128) {
+                  utftext += String.fromCharCode(c);
+              } else if ((c > 127) && (c < 2048)) {
+                  utftext += String.fromCharCode((c >> 6) | 192);
+                  utftext += String.fromCharCode((c & 63) | 128);
+              } else {
+                  utftext += String.fromCharCode((c >> 12) | 224);
+                  utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                  utftext += String.fromCharCode((c & 63) | 128);
+              }
+
+          }
+          return utftext;
+      }
+
+      // private method for UTF-8 decoding  
+      _utf8_decode = function(utftext) {
+          var string = "";
+          var i = 0;
+          var c = c1 = c2 = 0;
+          while (i < utftext.length) {
+              c = utftext.charCodeAt(i);
+              if (c < 128) {
+                  string += String.fromCharCode(c);
+                  i++;
+              } else if ((c > 191) && (c < 224)) {
+                  c2 = utftext.charCodeAt(i + 1);
+                  string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+                  i += 2;
+              } else {
+                  c2 = utftext.charCodeAt(i + 1);
+                  c3 = utftext.charCodeAt(i + 2);
+                  string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+                  i += 3;
+              }
+          }
+          return string;
+      }
+      }
+  </script>
+  <script>
+    var base64 = new Base64();
+    var data = JSON.parse(decodeURI(base64.decode(window.location.href.split('?data=')[1])));
+    for(var item in data.data){
+      for(var arg of ['alarmName', 'destGeo', 'srcGeo', 'payload']){
+        var tmparg = data.data[item][arg];
+        var tmp = []
+        for(var item2 of tmparg){
+          tmp.push({'value': item2})
+        }
+        data.data[item][arg] = tmp;
+      }
+    }
+    console.log(data);
+    new Vue({
+      el: '#app',
+      data: function() {
+        return { 
+          cardData: data,
+          level: [
+            { type: 'danger', label: '严重', bg: 'bg1'},
+            { type: 'warning', label: '高危', bg: 'bg2'},
+            { type: 'info', label: '中危', bg: 'bg3'},
+            { type: 'info', label: '低危', bg: 'bg4'},
+            { type: '', label: '正常', bg: 'bg5'},
+            { type: '', label: '未定义', bg: 'bg6'}
+          ],
+          isPhone: window.screen.width < window.screen.height
+        }
+      }
+    })
+  </script>
+  <style>
+  
+    .item {
+      margin-bottom: 18px;
+    }
+  
+    .clearfix:before,
+    .clearfix:after {
+      display: table;
+      content: "";
+    }
+    .clearfix:after {
+      clear: both
+    }
+  
+    .box-card {
+      width: auto;
+    }
+
+    .card-title {
+      font-weight:bold;
+    }
+
+    .bg1 {
+      background: #720000;
+      border-color: #720000;
+    }
+      
+    .bg2 {
+      background: #ff0000;
+      border-color: #ff0000;
+    }
+
+    .bg3 {
+      background: #ffae00;
+      border-color: #ffae00;
+    }
+
+    .bg4 {
+      background: #8a8a8a;
+      border-color: #8a8a8a;
+    }
+
+    .bg5 {
+      background: #e2e2e2;
+      border-color: #e2e2e2;
+    }
+
+    .el-card{
+		  margin:10px;
+	  }
+
+  </style>
+</html>
