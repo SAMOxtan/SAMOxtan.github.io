@@ -168,7 +168,7 @@
   </script>
   <script>
     var base64 = new Base64();
-    var data = JSON.parse(decodeURI(base64.decode(getQuery(window.location.href).data)));
+    var data = JSON.parse(decodeURI(base64.decode(decodeURI(getQuery(window.location.href).data))));
     for(var item in data.data){
       for(var arg of ['alarmName', 'destGeo', 'srcGeo', 'payload']){
         var tmparg = data.data[item][arg];
